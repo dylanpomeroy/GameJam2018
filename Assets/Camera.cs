@@ -42,7 +42,7 @@ public class Camera : MonoBehaviour {
         CompleteButton.SetActive(false);
         CompleteButton.GetComponent<Button>().onClick.AddListener(CompleteClicked);
 
-        CurrentStage = 0;
+        CurrentStage = 1;
         CurrentDialogLevel = 0;
 
         ExternalPieces = new List<GameObject>();
@@ -81,7 +81,7 @@ public class Camera : MonoBehaviour {
                 Stage1();
                 break;
             case 2:
-                Stage2();
+                Stage2Override();
                 break;
             case 3:
                 Stage3();
@@ -274,6 +274,21 @@ public class Camera : MonoBehaviour {
         return false;
     }
 
+    void Stage2Override()
+    {
+        switch (CurrentDialogLevel)
+        {
+            case 0:
+                SetNewVideo(Ref.VideoFiles[9], "");
+                HandleOptionsWithLoop(Ref.FrameRepeatRanges[9], new List<string> { "Congrats", "Friend", "You", "Win" });
+                CurrentDialogLevel++;
+                break;
+            default:
+                break;
+        }
+        
+    }
+
     void Stage1()
     {
         HandlePuzzleStuff(Ref.LevelTwoPieceQueue, Ref.LevelTwoExternalPieces);
@@ -281,6 +296,7 @@ public class Camera : MonoBehaviour {
         switch (CurrentDialogLevel)
         {
             case 0:
+                SetNewVideo(Ref.VideoFiles[5], Ref.AudioFiles[5]);
                 CurrentDialogLevel++;
                 break;
             case 1:
@@ -335,8 +351,11 @@ public class Camera : MonoBehaviour {
                 }
                 if (OptionCSelectedHistory)
                 {
+                    if (VideoPlayer.frame > Ref.FrameRepeatRanges[9].First())
+                    {
+                        CurrentDialogLevel += 2;
+                    }
                     // skipping puzzle
-                    CurrentDialogLevel += 2;
                 }
                 break;
             case 4:
