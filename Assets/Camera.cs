@@ -68,6 +68,8 @@ public class Camera : MonoBehaviour {
         if (!puzzleInitialized) CompleteButton.SetActive(false);
         else CompleteButton.SetActive(true);
 
+        HandlePuzzleStuff();
+
         switch (CurrentStage)
         {
             case 0:
@@ -99,12 +101,11 @@ public class Camera : MonoBehaviour {
 
     void Stage0()
     {
-        HandlePuzzleStuff();
-        
+
         switch (CurrentDialogLevel)
         {
             case 0:
-                SetNewVideo(Ref.VideoFiles[0]);
+                SetNewVideo(Ref.VideoFiles[0], Ref.AudioFiles[0]);
                 CurrentDialogLevel++;
                 break;
             case 1:
@@ -128,7 +129,7 @@ public class Camera : MonoBehaviour {
                 else if (VideoPlayer.frame > 850) SetVideoToFrame(730);
                 break;
             case 3:
-                SetNewVideo(Ref.VideoFiles[2]);
+                SetNewVideo(Ref.VideoFiles[2], Ref.AudioFiles[0]);
                 SetVideoToFrame(VideoPlayer.frame + 600); // temporary
                 CurrentDialogLevel++;
                 break;
@@ -136,17 +137,14 @@ public class Camera : MonoBehaviour {
                 if (VideoPlayer.frame > 300)
                 {
                     InitializePuzzle();
-                    Stopwatch.Start();
                     CurrentDialogLevel++;
                 }
                 break;
             case 5:
-                if (Stopwatch.ElapsedMilliseconds > 2000)
+                if (CompleteSelected)
                 {
-                    Stopwatch.Stop();
-                    Stopwatch.Reset();
                     PuzzleCompleted();
-                    SetNewVideo(Ref.VideoFiles[1]);
+                    SetNewVideo(Ref.VideoFiles[1], Ref.AudioFiles[0]);
                     CurrentDialogLevel++;
                 }
                 break;
@@ -199,15 +197,6 @@ public class Camera : MonoBehaviour {
                 var newObject = Instantiate(GameObject.Find(nextObjectName));
                 newObject.transform.position = Ref.SelectorPeicePlacements[2];
                 Ref.SelectorSectionsFull[2] = true;
-            }
-        }
-
-        if (puzzleInitialized)
-        {
-            if (CompleteSelected)
-            {
-                PuzzleCompleted();
-
             }
         }
     }
@@ -263,11 +252,13 @@ public class Camera : MonoBehaviour {
         OptionDSelected = false;
     }
 
-    void SetNewVideo(string newVideoUrl)
+    void SetNewVideo(string newVideoUrl, string newAudioFile)
     {
         PauseVideo();
         VideoPlayer.url = newVideoUrl;
+        AudioPlayer.clip = Resources.Load<AudioClip>(newAudioFile);
         SetVideoToFrame(0);
+        AudioPlayer.time = 0;
         PlayVideo();
     }
 
@@ -281,7 +272,7 @@ public class Camera : MonoBehaviour {
         VideoPlayer.isLooping = true;
 
         AudioPlayer = camera.AddComponent<AudioSource>();
-        AudioPlayer.clip = Resources.Load<AudioClip>("audio3");
+        AudioPlayer.playOnAwake = false;
     }
 
     void SetVideoToFrame(long frame)

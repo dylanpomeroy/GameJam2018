@@ -56,7 +56,7 @@ namespace Assets
 
         public static List<string> AudioFiles = new List<string>
         {
-            Application.dataPath + "/audio.mp3",
+            "audio3",
 
         };
         
