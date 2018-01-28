@@ -17,7 +17,6 @@ public class Camera : MonoBehaviour {
 
     int CurrentStage;
     int CurrentDialogLevel;
-    List<int> CurrentDialogOptionSelections;
     
     void Start() {
         InitializeVideoPlayer();
@@ -45,7 +44,6 @@ public class Camera : MonoBehaviour {
 
         CurrentStage = 0;
         CurrentDialogLevel = 0;
-        CurrentDialogOptionSelections = new List<int>();
 
         ExternalPieces = new List<GameObject>();
         for (int i = 1; i <= 16; i++)
@@ -619,7 +617,6 @@ public class Camera : MonoBehaviour {
                 OptionCSelected = false;
                 OptionASelectedHistory = false;
                 OptionBSelectedHistory = false;
-                OptionCSelectedHistory = false;
                 CompleteSelected = false;
                 CurrentDialogLevel = 0;
                 Ref.SelectorSectionsFull[0] = false;
@@ -631,10 +628,191 @@ public class Camera : MonoBehaviour {
 
     void Stage4()
     {
+        HandlePuzzleStuff(Ref.LevelFivePieceQueue, Ref.LevelFiveExternalPieces);
+
+        switch (CurrentDialogLevel)
+        {
+            case 0:
+                if (VideoPlayer.frame > Ref.FrameRepeatRanges[22].First())
+                {
+                    if (HandleOptionsWithLoop(Ref.FrameRepeatRanges[22], Ref.DialogOptions[9]))
+                    {
+                        CurrentDialogLevel++;
+                    }
+                }
+                break;
+            case 1:
+                if (OptionASelected)
+                {
+                    SetNewVideo(Ref.VideoFiles[20], Ref.AudioFiles[20]);
+                    OptionASelected = false;
+                    OptionASelectedHistory = true;
+                }
+                else if (OptionBSelected)
+                {
+                    SetNewVideo(Ref.VideoFiles[21], Ref.AudioFiles[21]);
+                    OptionBSelected = false;
+                    OptionBSelectedHistory = true;
+                }
+                CurrentDialogLevel++;
+                break;
+            case 2:
+                if (OptionASelectedHistory)
+                {
+                    if (VideoPlayer.frame > Ref.FrameRepeatRanges[23].First())
+                    {
+                        if (HandleOptionsWithLoop(Ref.FrameRepeatRanges[23], Ref.DialogOptions[7]))
+                        {
+                            CurrentDialogLevel++; // fix?
+                        }
+                    }
+                }
+                if (OptionBSelectedHistory)
+                {
+                    if (VideoPlayer.frame > Ref.FrameRepeatRanges[24].First())
+                    {
+                        InitializePuzzle();
+                        CurrentDialogLevel = 5; // fix
+                    }
+                }
+                break;
+            case 3:
+                if (OptionASelected) // albert needs to be stopped
+                {
+                    OptionASelected = false;
+                    SetNewVideo(Ref.VideoFiles[22], Ref.AudioFiles[22]);
+                    CurrentDialogLevel = 4;
+                }
+                else // that's what my mom said
+                {
+                    OptionBSelected = false;
+                    SetNewVideo(Ref.VideoFiles[23], Ref.AudioFiles[23]);
+                    CurrentDialogLevel = 6;
+                }
+                break;
+            case 4:
+                if (VideoPlayer.frame > Ref.FrameRepeatRanges[25].First())
+                {
+                    InitializePuzzle();
+                    CurrentDialogLevel++;
+                }
+                break;
+            case 5:
+                if (CompleteSelected)
+                {
+                    PuzzleCompleted();
+                    PlayVideo();
+                    CurrentDialogLevel = 9;
+                }
+                break;
+            case 6:
+                if (VideoPlayer.frame > Ref.FrameRepeatRanges[26].First())
+                {
+                    if (HandleOptionsWithLoop(Ref.FrameRepeatRanges[26], Ref.DialogOptions[7]))
+                    {
+                        CurrentDialogLevel++;
+                    }
+                }
+                break;
+            case 7:
+                if (OptionASelected) // flashy comeback 1
+                {
+                    SetNewVideo(Ref.VideoFiles[24], Ref.AudioFiles[24]); 
+                }
+                else // flashy comeback 2
+                {
+                    SetNewVideo(Ref.VideoFiles[25], Ref.AudioFiles[25]);
+                }
+                CurrentDialogLevel++;
+                break;
+            case 8:
+                if (OptionASelected)
+                {
+                    if (VideoPlayer.frame > Ref.FrameRepeatRanges[27].First())
+                    {
+                        InitializePuzzle();
+                        CurrentDialogLevel = 5;
+                    }
+                }
+                else
+                {
+                    if (VideoPlayer.frame > Ref.FrameRepeatRanges[28].First())
+                    {
+                        InitializePuzzle();
+                        CurrentDialogLevel = 5;
+                    }
+                }
+                break;
+            default:
+                CurrentStage++;
+                OptionASelected = false;
+                OptionBSelected = false;
+                OptionCSelected = false;
+                OptionASelectedHistory = false;
+                OptionBSelectedHistory = false;
+                OptionCSelectedHistory = false;
+                CompleteSelected = false;
+                CurrentDialogLevel = 0;
+                Ref.SelectorSectionsFull[0] = false;
+                Ref.SelectorSectionsFull[1] = false;
+                Ref.SelectorSectionsFull[2] = false;
+                break;
+        }
     }
 
     void Stage5()
     {
+        HandlePuzzleStuff(Ref.LevelFourPieceQueue, Ref.LevelFourExternalPieces);
+
+        switch (CurrentDialogLevel)
+        {
+            case 0:
+                if (VideoPlayer.frame > Ref.FrameRepeatRanges[21].First())
+                {
+                    if (HandleOptionsWithLoop(Ref.FrameRepeatRanges[21], Ref.DialogOptions[9]))
+                    {
+                        CurrentDialogLevel++;
+                    }
+                }
+                break;
+            case 1:
+                if (OptionASelected)
+                {
+                    SetNewVideo(Ref.VideoFiles[20], Ref.AudioFiles[20]);
+                }
+                else
+                {
+                    SetNewVideo(Ref.VideoFiles[21], Ref.AudioFiles[21]);
+                }
+                CurrentDialogLevel++;
+                break;
+            case 2:
+                if (OptionASelected)
+                {
+                    if (VideoPlayer.frame > Ref.FrameRepeatRanges[22].First())
+                    {
+                        InitializePuzzle();
+                        CurrentDialogLevel++;
+                    }
+                }
+                else
+                {
+                    if (VideoPlayer.frame > Ref.FrameRepeatRanges[23].First())
+                    {
+                        InitializePuzzle();
+                        CurrentDialogLevel++;
+                    }
+                }
+                break;
+            case 3:
+                if (CompleteSelected)
+                {
+                    PuzzleCompleted();
+                    PlayVideo();
+                    CurrentDialogLevel++;
+                }
+                break;
+        }
     }
 
     void SetNewVideo(string newVideoUrl, string newAudioFile)
@@ -733,7 +911,6 @@ public class Camera : MonoBehaviour {
         OptionCSelected = true;
     }
 
-    bool OptionDSelectedHistory = false;
     bool OptionDSelected = false;
     void OptionDClicked()
     {

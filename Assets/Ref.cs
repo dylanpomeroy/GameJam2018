@@ -129,6 +129,7 @@ namespace Assets
             new List<string>{ "Offer throat soother", "Spray with anti-bacterial cleaning solution" },
             new List<string>{ "*Fake cough* You infected me!", "Give me your shoe please" },
             new List<string>{ "Thou hath been cleasned", "Get it together" },
+            new List<string>{ "Approach", "Run away" }
         };
 
         public static List<List<long>> FrameRepeatRanges = new List<List<long>>
@@ -149,6 +150,7 @@ namespace Assets
             new List<long>{ 730, 850 },
             new List<long>{ 730, 850 },
             new List<long>{ 730, 850 }, // 15
+            new List<long>{ 730, 850 },
             new List<long>{ 730, 850 },
             new List<long>{ 730, 850 },
             new List<long>{ 730, 850 },
@@ -176,10 +178,14 @@ namespace Assets
             Application.dataPath + "/video3.mp4",
             Application.dataPath + "/video3.mp4",
             Application.dataPath + "/video3.mp4",
+            Application.dataPath + "/video3.mp4",
+            Application.dataPath + "/video3.mp4",
         };
 
         public static List<string> AudioFiles = new List<string>
         {
+            "audio3",
+            "audio3",
             "audio3",
             "audio3",
             "audio3",
