@@ -12,12 +12,11 @@ public class Camera : MonoBehaviour {
     VideoPlayer VideoPlayer;
     AudioSource AudioPlayer;
     private List<GameObject> OptionButtons;
-
     private GameObject CompleteButton;
+    private List<GameObject> ExternalPieces;
 
     int CurrentStage;
     int CurrentDialogLevel;
-    Stopwatch Stopwatch;
     List<int> CurrentDialogOptionSelections;
     
     void Start() {
@@ -47,7 +46,13 @@ public class Camera : MonoBehaviour {
         CurrentStage = 0;
         CurrentDialogLevel = 0;
         CurrentDialogOptionSelections = new List<int>();
-        Stopwatch = new Stopwatch();
+
+        ExternalPieces = new List<GameObject>();
+        for (int i = 1; i <= 16; i++)
+        {
+            ExternalPieces.Add(GameObject.Find("ExternalPiece" + i));
+        }
+        ExternalPieces.ForEach(piece => piece.SetActive(false));
     }
 
     void Update()
@@ -68,7 +73,6 @@ public class Camera : MonoBehaviour {
         if (!puzzleInitialized) CompleteButton.SetActive(false);
         else CompleteButton.SetActive(true);
 
-        HandlePuzzleStuff();
 
         switch (CurrentStage)
         {
@@ -101,6 +105,7 @@ public class Camera : MonoBehaviour {
 
     void Stage0()
     {
+        HandlePuzzleStuff(Ref.LevelFivePieceQueue, Ref.LevelFiveExternalPieces);
 
         switch (CurrentDialogLevel)
         {
@@ -170,34 +175,38 @@ public class Camera : MonoBehaviour {
         }
     }
 
-    void HandlePuzzleStuff()
+    void HandlePuzzleStuff(List<string> pieceQueue, List<string> externalPieces)
     {
-        if (puzzleInitialized && Ref.LevelOnePieceQueue.Count > 0)
+        if (puzzleInitialized && pieceQueue.Count > 0)
         {
             if (!Ref.SelectorSectionsFull[0])
             {
-                var nextObjectName = Ref.LevelOnePieceQueue[0];
-                Ref.LevelOnePieceQueue.RemoveAt(0);
+                var nextObjectName = pieceQueue[0];
+                pieceQueue.RemoveAt(0);
                 var newObject = Instantiate(GameObject.Find(nextObjectName));
                 newObject.transform.position = Ref.SelectorPeicePlacements[0];
                 Ref.SelectorSectionsFull[0] = true;
             }
             else if (!Ref.SelectorSectionsFull[1])
             {
-                var nextObjectName = Ref.LevelOnePieceQueue[0];
-                Ref.LevelOnePieceQueue.RemoveAt(0);
+                var nextObjectName = pieceQueue[0];
+                pieceQueue.RemoveAt(0);
                 var newObject = Instantiate(GameObject.Find(nextObjectName));
                 newObject.transform.position = Ref.SelectorPeicePlacements[1];
                 Ref.SelectorSectionsFull[1] = true;
             }
             else if (!Ref.SelectorSectionsFull[2])
             {
-                var nextObjectName = Ref.LevelOnePieceQueue[0];
-                Ref.LevelOnePieceQueue.RemoveAt(0);
+                var nextObjectName = pieceQueue[0];
+                pieceQueue.RemoveAt(0);
                 var newObject = Instantiate(GameObject.Find(nextObjectName));
                 newObject.transform.position = Ref.SelectorPeicePlacements[2];
                 Ref.SelectorSectionsFull[2] = true;
             }
+
+            ExternalPieces
+            .Where(piece => externalPieces.Contains(piece.name))
+            .ToList().ForEach(piece => piece.SetActive(true));
         }
     }
 
@@ -369,10 +378,13 @@ public class Camera : MonoBehaviour {
     void InitializePuzzle()
     {
         puzzleInitialized = true;
+        
+
         this.fadeVideoAlpha = 0.1f;
         this.fadeVideoCancelWhenReachedAlpha = 0.1f;
         InvokeRepeating("FadeVideoAlpha", 0, 0.1f);
         PauseVideo();
+        
     }
 
     void PuzzleCompleted()
@@ -384,6 +396,8 @@ public class Camera : MonoBehaviour {
         puzzleInitialized = false;
         CompleteButton.SetActive(false);
         CompleteSelected = false;
+
+        ExternalPieces.ForEach(piece => piece.SetActive(false));
     }
 
     private float addVideoAlpha;
