@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Assets;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +12,8 @@ public class Camera : MonoBehaviour {
     VideoPlayer VideoPlayer;
     AudioSource AudioPlayer;
     private List<GameObject> OptionButtons;
+
+    private GameObject CompleteButton;
 
     int CurrentStage;
     int CurrentDialogLevel;
@@ -37,6 +40,10 @@ public class Camera : MonoBehaviour {
         OptionButtons[2].GetComponent<Button>().onClick.AddListener(OptionCClicked);
         OptionButtons[3].GetComponent<Button>().onClick.AddListener(OptionDClicked);
 
+        CompleteButton = GameObject.Find("ButtonComplete");
+        CompleteButton.SetActive(false);
+        CompleteButton.GetComponent<Button>().onClick.AddListener(CompleteClicked);
+
         CurrentStage = 0;
         CurrentDialogLevel = 0;
         CurrentDialogOptionSelections = new List<int>();
@@ -50,8 +57,17 @@ public class Camera : MonoBehaviour {
         HandleHitPoints();
     }
 
+    private void OnMouseDown()
+    {
+        InitializeDialogOptions(new List<string> { "asdf", "asdf" });
+        FadeVideoAlpha();
+    }
+
     void HandleHitPoints()
     {
+        if (!puzzleInitialized) CompleteButton.SetActive(false);
+        else CompleteButton.SetActive(true);
+
         switch (CurrentStage)
         {
             case 0:
@@ -83,6 +99,8 @@ public class Camera : MonoBehaviour {
 
     void Stage0()
     {
+        HandlePuzzleStuff();
+        
         switch (CurrentDialogLevel)
         {
             case 0:
@@ -92,7 +110,12 @@ public class Camera : MonoBehaviour {
             case 1:
                 if (VideoPlayer.frame > 730)
                 {
-                    InitializeDialogOptions(Ref.DialogOptions[0]);
+                    if (HandleOptionsWithLoop(
+                        Ref.FrameRepeatRanges[0],
+                        Ref.DialogOptions[0]))
+                    {
+                        CurrentDialogLevel++;
+                    }
                     CurrentDialogLevel++;
                 }
                 break;
@@ -149,6 +172,61 @@ public class Camera : MonoBehaviour {
         }
     }
 
+    void HandlePuzzleStuff()
+    {
+        if (puzzleInitialized && Ref.LevelOnePieceQueue.Count > 0)
+        {
+            if (!Ref.SelectorSectionsFull[0])
+            {
+                var nextObjectName = Ref.LevelOnePieceQueue[0];
+                Ref.LevelOnePieceQueue.RemoveAt(0);
+                var newObject = Instantiate(GameObject.Find(nextObjectName));
+                newObject.transform.position = Ref.SelectorPeicePlacements[0];
+                Ref.SelectorSectionsFull[0] = true;
+            }
+            else if (!Ref.SelectorSectionsFull[1])
+            {
+                var nextObjectName = Ref.LevelOnePieceQueue[0];
+                Ref.LevelOnePieceQueue.RemoveAt(0);
+                var newObject = Instantiate(GameObject.Find(nextObjectName));
+                newObject.transform.position = Ref.SelectorPeicePlacements[1];
+                Ref.SelectorSectionsFull[1] = true;
+            }
+            else if (!Ref.SelectorSectionsFull[2])
+            {
+                var nextObjectName = Ref.LevelOnePieceQueue[0];
+                Ref.LevelOnePieceQueue.RemoveAt(0);
+                var newObject = Instantiate(GameObject.Find(nextObjectName));
+                newObject.transform.position = Ref.SelectorPeicePlacements[2];
+                Ref.SelectorSectionsFull[2] = true;
+            }
+        }
+
+        if (puzzleInitialized)
+        {
+            if (CompleteSelected)
+            {
+                PuzzleCompleted();
+
+            }
+        }
+    }
+
+    bool dialogOptionsInitialized = false;
+    bool HandleOptionsWithLoop(List<long> frameRepeatRange, List<string> dialogOptions)
+    {
+        if (!dialogOptionsInitialized) InitializeDialogOptions(dialogOptions);
+        dialogOptionsInitialized = true;
+
+        if (OptionASelected || OptionBSelected || OptionCSelected || OptionDSelected)
+        {
+            UninitializeDialogOptions();
+            dialogOptionsInitialized = false;
+            return true;
+        }
+        return false;
+    }
+
     void Stage1()
     {
     }
@@ -175,6 +253,14 @@ public class Camera : MonoBehaviour {
 
     void Stage7()
     {
+    }
+
+    void UnselectOptionButtons()
+    {
+        OptionASelected = false;
+        OptionBSelected = false;
+        OptionCSelected = false;
+        OptionDSelected = false;
     }
 
     void SetNewVideo(string newVideoUrl)
@@ -244,6 +330,12 @@ public class Camera : MonoBehaviour {
         }
     }
 
+    bool CompleteSelected = false;
+    void CompleteClicked()
+    {
+        CompleteSelected = true;
+    }
+
     bool OptionASelected = false;
     void OptionAClicked()
     {
@@ -277,8 +369,15 @@ public class Camera : MonoBehaviour {
         }
     }
 
+    void UninitializeDialogOptions()
+    {
+        OptionButtons.ForEach(button => button.SetActive(false));
+    }
+
+    bool puzzleInitialized = false;
     void InitializePuzzle()
     {
+        puzzleInitialized = true;
         this.fadeVideoAlpha = 0.1f;
         this.fadeVideoCancelWhenReachedAlpha = 0.1f;
         InvokeRepeating("FadeVideoAlpha", 0, 0.1f);
@@ -290,6 +389,10 @@ public class Camera : MonoBehaviour {
         this.addVideoAlpha = 0.1f;
         this.addVideoCancelWhenReachedAlpha = 1.0f;
         InvokeRepeating("AddVideoAlpha", 0, 0.1f);
+
+        puzzleInitialized = false;
+        CompleteButton.SetActive(false);
+        CompleteSelected = false;
     }
 
     private float addVideoAlpha;
